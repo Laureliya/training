@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Family Vocabulary Training</title>
+<style>
+:root{--a:#6558e8;--o:#ff9f43;--ok:#16875f;--bad:#d84b5b;--ink:#202842;--line:#e4e8f4}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Arial;background:linear-gradient(135deg,#f6f8ff,#fff7ed);color:var(--ink)}
+.wrap{max-width:980px;margin:auto;padding:22px}.hero{background:linear-gradient(120deg,#6558e8,#4388ff);color:#fff;border-radius:25px;padding:27px}.hero h1{margin:0;font-size:clamp(28px,4vw,42px)}.hero p{opacity:.92}
+.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;margin-top:18px;box-shadow:0 8px 25px #3341550d}h2{margin:0 0 7px}.inst{color:#6b7280;margin:0 0 17px}
+.row{padding:14px 0;border-top:1px dashed var(--line)}.row:first-of-type{border:0}.q{font-weight:800;margin-bottom:9px}
+button{font:inherit}.sound{border:0;background:#eef0ff;color:var(--a);border-radius:999px;padding:8px 12px;cursor:pointer;font-weight:800}
+.letters{display:flex;gap:7px;flex-wrap:wrap}.letter{width:43px;height:43px;background:#fff;border:2px solid #d7dcef;border-radius:11px;font-size:19px;font-weight:900;cursor:pointer}.letter:disabled{opacity:.22}
+.build{min-height:46px;border:2px dashed #cdd5ec;border-radius:12px;padding:8px;margin:9px 0;background:#fafbff}.build button{border:0;background:#eef0ff;border-radius:8px;margin:2px;padding:6px 9px;font-weight:900;cursor:pointer}
+.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px}.choice{border:2px solid #dbe0ef;background:#fff;border-radius:12px;padding:11px;cursor:pointer;text-align:left}.choice.sel{border-color:var(--a);background:#f0efff}.fb{min-height:21px;margin-top:7px;font-weight:750}.ok{color:var(--ok)}.bad{color:var(--bad)}
+.btn{border:0;background:var(--a);color:#fff;padding:11px 16px;border-radius:12px;font-weight:850;cursor:pointer;margin-top:10px}.orange{background:var(--o)}.score{text-align:center;font-size:46px;font-weight:900;color:var(--a);padding:20px}
+</style></head><body><div class="wrap">
+<section class="hero"><h1>Family & Appearance Practice</h1><p>Build • choose • listen • remember</p></section>
+
+<section class="card"><h2>1. Family — build the word</h2><p class="inst">Look at the Russian meaning. Build the English word from the mixed letters. Use 🔊 if you want to hear it.</p><div id="builds"></div><button class="btn" onclick="checkBuilds()">Check words</button></section>
+
+<section class="card"><h2>2. Opposite challenge</h2><p class="inst">Choose the opposite. Pay attention to the whole phrase.</p><div id="opposites"></div><button class="btn" onclick="checkGroup('opposites')">Check opposites</button></section>
+
+<section class="card"><h2>3. Possessives</h2><p class="inst">Choose: my, your, his, her, our or their. First decide who owns the person or thing.</p><div id="poss"></div><button class="btn" onclick="checkGroup('poss')">Check possessives</button></section>
+
+<section class="card"><h2>4. Listening memory</h2><p class="inst">Press 🔊 and choose what you hear. Try not to go back to Exercise 1.</p><div id="listen"></div><button class="btn" onclick="checkGroup('listen')">Check listening</button></section>
+
+<section class="card"><h2>Finish</h2><p class="inst">See your total result, then repeat only the difficult items.</p><button class="btn orange" onclick="finish()">My result</button><div id="result"></div></section>
+</div>
+<script>
+const fam=[["жена","wife"],["муж","husband"],["дочь","daughter"],["сын","son"],["тётя","aunt"],["дядя","uncle"],["сестра","sister"],["брат","brother"],["мама","mother"],["папа","father"],["бабушка","grandma"],["дедушка","grandpa"]];
+let built={},ans={}; const sh=a=>[...a].sort(()=>Math.random()-.5);
+function speak(t){if(!('speechSynthesis'in window)){alert("Speech is not supported in this browser.");return}speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang="en-GB";u.rate=.8;speechSynthesis.speak(u)}
+function renderBuilds(){let r=document.getElementById("builds");r.innerHTML="";fam.forEach((x,i)=>{built[i]=built[i]||[];let letters=sh(x[1].toUpperCase().split(""));r.innerHTML+=`<div class="row"><div class="q">${i+1}. ${x[0]} &nbsp;<button class="sound" onclick="speak('${x[1]}')">🔊 Listen</button></div><div class="build" id="b${i}">${built[i].map((c,j)=>`<button onclick="del(${i},${j})">${c}</button>`).join("")}</div><div class="letters">${letters.map(c=>`<button class="letter" onclick="add(${i},'${c}',this)">${c}</button>`).join("")}</div><div class="fb" id="fbb${i}"></div></div>`})}
+function add(i,c,b){built[i].push(c);b.disabled=true;document.getElementById("b"+i).innerHTML=built[i].map((c,j)=>`<button onclick="del(${i},${j})">${c}</button>`).join("")}
+function del(i,j){built[i].splice(j,1);renderBuilds()}
+function checkBuilds(){fam.forEach((x,i)=>{let ok=(built[i]||[]).join("").toLowerCase()===x[1];document.getElementById("fbb"+i).innerHTML=ok?'<span class="ok">✓ Great!</span>':'<span class="bad">Try again.</span>'})}
+
+const G={
+opposites:[
+["young ≠ …",["old","short","small","wavy"],"old"],
+["old ≠ …",["young","tall","long","straight"],"young"],
+["tall ≠ …",["short","old","small","long"],"short"],
+["short (person) ≠ …",["tall","young","old","small"],"tall"],
+["big eyes ≠ …",["small eyes","short eyes","long eyes","wavy eyes"],"small eyes"],
+["small eyes ≠ …",["big eyes","long eyes","short eyes","straight eyes"],"big eyes"],
+["long hair ≠ …",["short hair","small hair","wavy hair","tall hair"],"short hair"],
+["short hair ≠ …",["long hair","big hair","young hair","small hair"],"long hair"],
+["wavy hair ≠ …",["straight hair","short hair","long hair","big hair"],"straight hair"],
+["straight hair ≠ …",["wavy hair","small hair","young hair","tall hair"],"wavy hair"]
+],
+poss:[
+["I have a sister. … name is Kate.",["Her","His","Our","Their"],"Her"],
+["Tom has a brother. … brother is twelve.",["His","Her","My","Our"],"His"],
+["Anna has a camera. It is … camera.",["her","his","their","our"],"her"],
+["Ben has a football. It is … football.",["his","her","my","their"],"his"],
+["Ben and Lucy have a dog. It is … dog.",["their","his","her","our"],"their"],
+["We have a big family. This is … family.",["our","their","his","her"],"our"],
+["I have a new watch. This is … watch.",["my","your","his","their"],"my"],
+["You have a skateboard. Is this … skateboard?",["your","my","her","our"],"your"]
+],
+listen:[
+["wife",["жена","муж","дочь","тётя"],"жена"],
+["husband",["муж","сын","брат","дедушка"],"муж"],
+["daughter",["дочь","сестра","мама","жена"],"дочь"],
+["son",["сын","брат","папа","дядя"],"сын"],
+["aunt",["тётя","мама","сестра","бабушка"],"тётя"],
+["uncle",["дядя","папа","брат","дедушка"],"дядя"],
+["wavy hair",["волнистые волосы","прямые волосы","короткие волосы","длинные волосы"],"волнистые волосы"],
+["straight hair",["прямые волосы","волнистые волосы","длинные волосы","короткие волосы"],"прямые волосы"]
+]};
+function render(id){let r=document.getElementById(id);r.innerHTML="";G[id].forEach((q,i)=>{let prompt=id==="listen"?`<button class="sound" onclick="speak('${q[0]}')">🔊 Play</button>`:q[0];r.innerHTML+=`<div class="row"><div class="q">${i+1}. ${prompt}</div><div class="options">${sh(q[1]).map(o=>`<button class="choice" data-g="${id}" data-i="${i}" data-v="${o}" onclick="pick(this)">${o}</button>`).join("")}</div><div class="fb" id="fb_${id}_${i}"></div></div>`})}
+function pick(b){let g=b.dataset.g,i=b.dataset.i;ans[g+"_"+i]=b.dataset.v;document.querySelectorAll(`[data-g="${g}"][data-i="${i}"]`).forEach(x=>x.classList.remove("sel"));b.classList.add("sel")}
+function checkGroup(id){G[id].forEach((q,i)=>{document.getElementById(`fb_${id}_${i}`).innerHTML=ans[id+"_"+i]===q[2]?'<span class="ok">✓ Well done!</span>':'<span class="bad">Try again.</span>'})}
+function finish(){let c=0,t=fam.length;fam.forEach((x,i)=>{if((built[i]||[]).join("").toLowerCase()===x[1])c++});Object.keys(G).forEach(g=>G[g].forEach((q,i)=>{t++;if(ans[g+"_"+i]===q[2])c++}));let pc=Math.round(c/t*100);document.getElementById("result").innerHTML=`<div class="score">${pc}%<div style="font-size:18px;color:#202842">${c} / ${t} correct</div></div>`}
+renderBuilds();render("opposites");render("poss");render("listen");
+</script></body></html>
